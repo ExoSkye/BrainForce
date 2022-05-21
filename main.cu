@@ -87,8 +87,7 @@ int main(int argc, char** argv) {
 
         while (!found) {
             fnv1a64<<<256, 256>>>(d_matches, target, d_bruteforce_bytes, len);
-            increment<<<256, 256>>>(d_bruteforce_bytes, len);
-
+            
             if (iter % 10000 == 5000 || combos == possible_combos) {
                 time_t cur_time = time(NULL) - start_time;
                 time_t time_left = ((double) cur_time / (double) combos) * (possible_combos - (double) combos);
@@ -110,7 +109,7 @@ int main(int argc, char** argv) {
 
                         unsigned char* cpy_bytes = zero_bytes;
 
-                        while(*cpy_bytes)
+                        while(cpy_bytes < zero_bytes + LEN)
                             printf("%02x", (unsigned int) *cpy_bytes++);
                         printf("\n");
 
