@@ -4,7 +4,7 @@ project(BrainForce CXX CUDA)
 set(CMAKE_CUDA_STANDARD 20)
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(BrainForce main.cu adler.cu adler.cuh)
+add_executable(BrainForce main.cu fnv1a.cu fnv1a.cuh)
 
 set_target_properties(BrainForce PROPERTIES
         CUDA_SEPARABLE_COMPILATION ON)

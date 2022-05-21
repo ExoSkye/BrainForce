@@ -2,27 +2,9 @@
 #include <cstdint>
 #include <ctime>
 
-#include "adler.cuh"
+#include "fnv1a.cuh"
 
 const uint64_t LEN = 4;
-
-uint32_t adler_cpu(const unsigned char* inp_str, const size_t inp_len) {
-    uint16_t a = 1;
-    uint16_t b = 0;
-
-    for (int i = 0; i < inp_len; i++) {
-        const unsigned char inp_char = inp_str[i];
-        a += (uint8_t) inp_char;
-        a %= 65521;
-
-        b += a;
-        b %= 65521;
-    }
-
-    uint32_t out = b << 16 | a;
-
-    return out;
-}
 
 int main() {
     auto** bruteforce_bytes = (unsigned char**)malloc(sizeof(unsigned char*) * 65536);
@@ -77,9 +59,11 @@ int main() {
         exit(0);
     }
 
-    const uint32_t target = adler_cpu((const unsigned char*)("a"), 1);
+    const uint64_t target = fnv1a64_cpu((const unsigned char*)("\xff\xff\xff\xff"), 4);
 
     bool found = false;
+
+    char* time_str = (char*) calloc(sizeof(char), 10);
 
     for (int len = 1; len < LEN + 1 && !found; len++) {
         printf("Trying length: %i\n", len);
@@ -95,18 +79,17 @@ int main() {
         time_t start_time = time(NULL);
 
         while (!found) {
-            adler<<<256, 256>>>(d_matches, target, d_bruteforce_bytes, len);
+            fnv1a64<<<256, 256>>>(d_matches, target, d_bruteforce_bytes, len);
             increment<<<256, 256>>>(d_bruteforce_bytes, len);
 
             if (iter % 10000 == 5000 || combos == possible_combos) {
                 time_t cur_time = time(NULL) - start_time;
                 time_t time_left = ((double) cur_time / (double) combos) * (possible_combos - (double) combos);
-                char* time_str = (char*) calloc(sizeof(char), 10);
                 struct tm* timeinfo = localtime(&time_left);
 
                 strftime(time_str, 10, "%X", timeinfo);
-                printf("Checking results (%f%% done - estimated time: %s)\n", (double) combos / possible_combos * 100,
-                       time_str);
+                printf("Checking results (%f%% done - estimated time: %s - %f H/s)\n", (double) combos /
+                    possible_combos * 100, time_str, (float) combos / (float) cur_time);
                 cudaMemcpy(matches, d_matches, sizeof(bool) * 65536, cudaMemcpyDeviceToHost);
 
                 for (int i = 0; i < 65536; i++) {
@@ -152,6 +135,7 @@ int main() {
     free(bruteforce_bytes);
     free(matches);
     free(zero_bytes);
+    free(time_str);
 
     return 0;
 }
