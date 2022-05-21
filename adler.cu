@@ -21,6 +21,8 @@ __global__ void adler(bool* match, const uint32_t target, unsigned char** inp_st
     inp_str[0] = blockIdx.x;
     inp_str[1] = threadIdx.x;
 
+    //printf("%i, %i\n", blockIdx.x, threadIdx.x);
+
     uint16_t a = 1;
     uint16_t b = 0;
 
