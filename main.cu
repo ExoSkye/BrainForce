@@ -1,12 +1,19 @@
 #include <cstdio>
 #include <cstdint>
 #include <ctime>
+#include <cinttypes>
 
 #include "fnv1a.cuh"
 
-const uint64_t LEN = 4;
+//const uint64_t LEN = 5;
 
-int main() {
+int main(int argc, char** argv) {
+    uint64_t LEN;
+
+    sscanf(argv[1], "%" PRIu64, &LEN);
+ 
+    const char* target_str = argv[2];
+
     auto** bruteforce_bytes = (unsigned char**)malloc(sizeof(unsigned char*) * 65536);
     auto* zero_bytes = (unsigned char*)calloc(sizeof(unsigned char), LEN);
 
@@ -59,7 +66,7 @@ int main() {
         exit(0);
     }
 
-    const uint64_t target = fnv1a64_cpu((const unsigned char*)("\xff\xff\xff\xff"), 4);
+    const uint64_t target = fnv1a64_cpu((const unsigned char*)target_str, LEN);
 
     bool found = false;
 
