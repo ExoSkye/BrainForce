@@ -2,17 +2,43 @@
 #include <cstdint>
 #include <ctime>
 #include <cinttypes>
+#include <fstream>
 
 #include "fnv1a.cuh"
+#include <boost/program_options.hpp>
+#include <iostream>
 
 //const uint64_t LEN = 5;
 
-int main(int argc, char** argv) {
-    uint64_t LEN;
+namespace po = boost::program_options;
 
-    sscanf(argv[1], "%" PRIu64, &LEN);
- 
-    const char* target_str = argv[2];
+int main(int argc, char** argv) {
+
+    po::options_description desc("Parameters");
+    desc.add_options()
+        ("help", "Print a help message")
+        ("target", po::value<std::string>(), "The hash to find (required)")
+        ("length", po::value<uint64_t>(), "The max length of the string the hash can represent (required)")
+        ("precompute", po::value<float>(), "Number of gigabytes of bruteforce inputs to precompute (required)")
+    ;
+
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::notify(vm);
+
+    if (vm.count("help")) {
+        std::cout << desc << std::endl;
+    }
+
+    if (!vm.count("target") || !vm.count("length") || !vm.count("precompute")) {
+        std::cout << "Required parameters are not set, exiting..." << std::endl;
+        exit(1);
+    }
+
+    uint64_t LEN = vm["length"].as<uint64_t>();
+    std::string target_std_string = vm["target"].as<std::string>();
+    const char* target_str = target_std_string.c_str();
+    uint64_t precompute = vm["precompute"].as<float>() * 1073741824;
 
     auto** bruteforce_bytes = (unsigned char**)malloc(sizeof(unsigned char*) * 65536);
     auto* zero_bytes = (unsigned char*)calloc(sizeof(unsigned char), LEN);
