@@ -1,10 +1,11 @@
 #include "fnv1a.cuh"
+#include "128-bit-literals/suffix128.hpp"
 
-__constant__ const uint64_t FNV_PRIME = 1099511628211ull;
-__constant__ const uint64_t OFFSET_BASIS = 14695981039346656037ull;
+__constant__ const __uint128_t FNV_PRIME = 309485009821345068724781371_128;
+__constant__ const __uint128_t OFFSET_BASIS = 144066263297769815596495629667062367629_128;
 
 __global__ void fnv1a64(
-    bool* match, const uint64_t target, unsigned char** inp_strs, const size_t inp_len
+    bool* match, const __uint128_t target, unsigned char** inp_strs, const size_t inp_len
 ) {
     int id = blockDim.x * blockIdx.x + threadIdx.x;
 
@@ -13,7 +14,7 @@ __global__ void fnv1a64(
     inp_str[0] = blockIdx.x;
     inp_str[1] = threadIdx.x;
 
-    uint64_t hash = OFFSET_BASIS;
+    __uint128_t hash = OFFSET_BASIS;
 
     for (int i = 0; i < inp_len; i++) {
         unsigned char inp_char = inp_str[i];
@@ -36,8 +37,8 @@ __global__ void fnv1a64(
     }
 }
 
-__host__ uint64_t fnv1a64_cpu(const unsigned char* inp_str, const size_t inp_len) {
-    uint64_t hash = OFFSET_BASIS;
+__host__ __uint128_t fnv1a64_cpu(const unsigned char* inp_str, const size_t inp_len) {
+    __uint128_t hash = OFFSET_BASIS;
 
     for (int i = 0; i < inp_len; i++) {
         unsigned char inp_char = inp_str[i];

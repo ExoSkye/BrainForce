@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
         exit(0);
     }
 
-    const uint64_t target = fnv1a64_cpu((const unsigned char*)target_str, LEN);
+    const __uint128_t target = fnv1a64_cpu((const unsigned char*)target_str, LEN);
 
     bool found = false;
 
